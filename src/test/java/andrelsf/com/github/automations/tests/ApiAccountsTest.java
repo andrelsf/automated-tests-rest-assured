@@ -13,6 +13,8 @@ import andrelsf.com.github.automations.core.BaseTest;
 import andrelsf.com.github.automations.http.requests.PostTransferRequest;
 import andrelsf.com.github.automations.http.responses.BalanceResponse;
 import java.math.BigDecimal;
+import java.util.HashMap;
+import java.util.Map;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runners.MethodSorters;
@@ -98,15 +100,15 @@ public class ApiAccountsTest extends BaseTest {
       .when()
         .post("/{accountId}/transfers")
       .then()
-        .statusCode(200)
-        .body("amount", is(amountToTransfer.floatValue()))
-        .body("toAccount", notNullValue())
-        .body("toAccount.accountNumber", is(aliceAccountResponse.accountNumber()))
-        .body("toAccount.agency", is(aliceAccountResponse.agency()))
-        .body("fromAccount", notNullValue())
-        .body("fromAccount.agency", is(bobAccountResponse.agency()))
-        .body("fromAccount.accountNumber", is(bobAccountResponse.accountNumber()))
-        .body("transferDate", notNullValue());
+        .assertThat().statusCode(200)
+        .assertThat().body("amount", is(amountToTransfer.floatValue()))
+        .assertThat().body("toAccount", notNullValue())
+        .assertThat().body("toAccount.accountNumber", is(aliceAccountResponse.accountNumber()))
+        .assertThat().body("toAccount.agency", is(aliceAccountResponse.agency()))
+        .assertThat().body("fromAccount", notNullValue())
+        .assertThat().body("fromAccount.agency", is(bobAccountResponse.agency()))
+        .assertThat().body("fromAccount.accountNumber", is(bobAccountResponse.accountNumber()))
+        .assertThat().body("transferDate", notNullValue());
   }
 
   @Test
@@ -144,15 +146,15 @@ public class ApiAccountsTest extends BaseTest {
       .when()
         .post("/{accountId}/transfers")
       .then()
-        .statusCode(200)
-        .body("amount", is(amountToTransfer.floatValue()))
-        .body("toAccount", notNullValue())
-        .body("toAccount.accountNumber", is(bobAccountResponse.accountNumber()))
-        .body("toAccount.agency", is(bobAccountResponse.agency()))
-        .body("fromAccount", notNullValue())
-        .body("fromAccount.agency", is(aliceAccountResponse.agency()))
-        .body("fromAccount.accountNumber", is(aliceAccountResponse.accountNumber()))
-        .body("transferDate", notNullValue());
+        .assertThat().statusCode(200)
+        .assertThat().body("amount", is(amountToTransfer.floatValue()))
+        .assertThat().body("toAccount", notNullValue())
+        .assertThat().body("toAccount.accountNumber", is(bobAccountResponse.accountNumber()))
+        .assertThat().body("toAccount.agency", is(bobAccountResponse.agency()))
+        .assertThat().body("fromAccount", notNullValue())
+        .assertThat().body("fromAccount.agency", is(aliceAccountResponse.agency()))
+        .assertThat().body("fromAccount.accountNumber", is(aliceAccountResponse.accountNumber()))
+        .assertThat().body("transferDate", notNullValue());
   }
 
   @Test
@@ -164,8 +166,8 @@ public class ApiAccountsTest extends BaseTest {
       .when()
         .post("/{accountId}/transfers")
       .then()
-        .statusCode(200)
-        .body("amount", is(amountToTransfer.floatValue()));
+        .assertThat().statusCode(200)
+        .assertThat().body("amount", is(amountToTransfer.floatValue()));
   }
 
   @Test
@@ -189,8 +191,8 @@ public class ApiAccountsTest extends BaseTest {
         .post("/{accountId}/transfers")
       .then()
         .statusCode(422)
-        .body("code", is(422))
-        .body("message", is(
+        .assertThat().body("code", is(422))
+        .assertThat().body("message", is(
             "Customer unable to make transfer.\nCheck account balance and daily transfer limit."));
   }
 
@@ -203,7 +205,33 @@ public class ApiAccountsTest extends BaseTest {
       .when()
         .post("/{accountId}/transfers")
       .then()
-        .statusCode(200)
-        .body("amount", is(amountToTransfer.floatValue()));
+        .assertThat().statusCode(200)
+        .assertThat().body("amount", is(amountToTransfer.floatValue()));
+  }
+
+  @Test
+  public void t13_shouldPerformUpdateTransferLimit_toBobAccount_and_returnSuccess_204_noContent() {
+    Map<String, Object> patchTransferLimitRequest = new HashMap<>();
+    patchTransferLimitRequest.put("amount", BigDecimal.valueOf(1000.0F));
+    given()
+        .pathParam("accountId", bobAccountId)
+        .body(patchTransferLimitRequest)
+      .when()
+        .patch("/{accountId}/transfer-limits")
+      .then()
+        .assertThat().statusCode(204);
+  }
+
+  @Test
+  public void t13_shouldPerformUpdateTransferLimit_toAliceAccount_and_returnSuccess_204_noContent() {
+    Map<String, Object> patchTransferLimitRequest = new HashMap<>();
+    patchTransferLimitRequest.put("amount",  BigDecimal.valueOf(1000.0F));
+    given()
+        .pathParam("accountId", aliceAccountId)
+        .body(patchTransferLimitRequest)
+        .when()
+        .patch("/{accountId}/transfer-limits")
+        .then()
+        .assertThat().statusCode(204);
   }
 }
