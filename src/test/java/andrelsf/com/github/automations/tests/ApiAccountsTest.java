@@ -229,9 +229,9 @@ public class ApiAccountsTest extends BaseTest {
     given()
         .pathParam("accountId", aliceAccountId)
         .body(patchTransferLimitRequest)
-        .when()
+      .when()
         .patch("/{accountId}/transfer-limits")
-        .then()
+      .then()
         .assertThat().statusCode(204);
   }
 }
